@@ -1,3 +1,9 @@
 <h3>Cookies</h3>
 
-<p>{{cookies.all}}</p>
+<ul>
+  {{#each allCookies as |cookie|}}
+    <li>
+      {{cookie.name}}: {{cookie.value}}
+    </li>
+  {{/each}}
+</ul>
