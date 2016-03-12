@@ -33,15 +33,16 @@ export default Ember.Service.extend({
     } else {
       return all;
     }
-  }/*,
+  },
 
-  write(name, value) {
-    const fastbootCookies = this.get('_fastbootCookies');
-
-    if (fastbootCookies) {
-      
+  write(name, value, options = {}) {
+    if (this.get('_isFastboot')) {
+      const response = this.get('fastboot._fastbootInfo.response');
+      response.cookie(name, value);
     } else {
-      
+      const encodedValue = encodeURIComponent(value);
+      const cookie = `${name}=${encodedValue}`;
+      document.cookie = cookie;
     }
-  }*/
+  }
 });
