@@ -41,8 +41,6 @@ export default Ember.Controller.extend({
 ## Open Issues
 
 - This is obviously lacking tests
-- Writing cookies currently only supports `name` and `value` in the browser (no support for setting expiration, host etc.)
-- When setting cookies that aren't accessible for client-side JS via Fastboot the addon should probably warn
 
 ## Installation
 
