@@ -8,6 +8,10 @@ service).
 __Having access to cookies both in the browser as well as in Fastboot is key to
 being able to share a common session.__
 
+__This is currently still in a very early stage. While the dummy app works, the
+addon is still missing tests and probably doesn't support a few thing you'd
+want to do in your app neither.__
+
 ## Installation
 
 Install `ember-cookies` with

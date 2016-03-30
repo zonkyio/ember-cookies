@@ -1,7 +1,7 @@
 {
   "name": "ember-cookies",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.1",
+  "description": "Cookies abstraction for Ember.js that works both in the browser as well as with Fastboot on the server.",
   "directories": {
     "doc": "doc",
     "test": "tests"
