@@ -24,18 +24,17 @@ Install `ember-cookies` with
 // app/controllers/application.js
 import Ember from 'ember';
 
-const { inject: { service }, computed, keys } = Ember;
+const { inject: { service }, computed } = Ember;
+const { keys } = Object;
 
 export default Ember.Controller.extend({
   cookies: service(),
 
-  init() {
-    this._super(...arguments);
-    this.get('cookies').write('now', new Date().getTime());
-  },
-
   allCookies: computed(function() {
-    const cookies = this.get('cookies').read();
+    let cookieService = this.get('cookies');
+    cookieService.write('now', new Date().getTime());
+
+    let cookies = cookieService.read();
     return keys(cookies).reduce((acc, key) => {
       const value = cookies[key];
       acc.push({ name: key, value });
@@ -53,12 +52,7 @@ The `cookies` service has methods for reading and writing cookies:
 * `read(name)`: reads the cookie with the given name, returns its value as a
   `String`.
 * `write(name, value, options = {})`: writes a cookie with the given name and
-  value; options can be used to set `domain`, `expires`, `maxAge`, `path` and
-  `secure`.
-
-## Open Issues
-
-- This is obviously lacking tests
+  value; options can be used to set `domain`, `expires`, `path` and `secure`.
 
 ## License
 

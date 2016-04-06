@@ -9,7 +9,8 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:testall"
+    "test": "ember try:testall",
+    "nodetest": "node node-tests/runner.js"
   },
   "repository": "",
   "engines": {
@@ -19,15 +20,18 @@
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.2.0",
+    "chai": "^3.5.0",
+    "chalk": "^1.1.1",
     "ember-ajax": "0.7.1",
     "ember-cli": "2.4.0",
+    "ember-cli-addon-tests": "simplabs/ember-cli-addon-tests#custom-fixture-path",
     "ember-cli-app-version": "^1.0.0",
     "ember-cli-dependency-checker": "^1.2.0",
     "ember-cli-fastboot": "0.6.1",
     "ember-cli-htmlbars": "^1.0.1",
     "ember-cli-htmlbars-inline-precompile": "^0.3.1",
     "ember-cli-inject-live-reload": "^1.3.1",
-    "ember-cli-qunit": "^1.2.1",
+    "ember-cli-mocha": "0.10.1",
     "ember-cli-release": "0.2.8",
     "ember-cli-sri": "^2.0.0",
     "ember-cli-uglify": "^1.2.0",
@@ -36,15 +40,23 @@
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.4",
     "ember-load-initializers": "^0.5.0",
+    "ember-mocha": "0.8.11",
     "ember-resolver": "^2.0.3",
+    "ember-sinon": "0.5.0",
     "ember-try": "^0.1.2",
-    "loader.js": "^4.0.0"
+    "glob": "^7.0.3",
+    "loader.js": "^4.0.0",
+    "mocha": "^2.4.5",
+    "request": "^2.69.0",
+    "rsvp": "^3.2.1",
+    "symlink-or-copy": "^1.0.1"
   },
   "keywords": [
     "ember-addon"
   ],
   "dependencies": {
-    "ember-cli-babel": "^5.1.5"
+    "ember-cli-babel": "^5.1.5",
+    "ember-getowner-polyfill": "~1.0.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
