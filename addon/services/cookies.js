@@ -1,11 +1,11 @@
 import Ember from 'ember';
 
-const { inject: { service }, computed, A, isEmpty, typeOf } = Ember;
+const { inject: { service }, computed, computed: { reads }, A, isEmpty, typeOf } = Ember;
 
 export default Ember.Service.extend({
   fastboot: service(),
 
-  _isFastboot: computed.notEmpty('fastboot._fastbootInfo'),
+  _isFastboot: reads('fastboot.isFastBoot'),
 
   _documentCookies: computed(function() {
     const all = document.cookie.split(';');
