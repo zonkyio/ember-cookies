@@ -8,14 +8,19 @@ var request = require('request');
 var request = RSVP.denodeify(request);
 
 describe('cookies access', function() {
-  this.timeout(300000);
+  this.timeout(600000);
 
   var app;
 
   before(function() {
     app = new AddonTestApp();
     return app.create('test-app', { fixturesPath: 'node-tests/fixtures' }).then(function() {
-      return app.runEmberCommand('install', 'ember-cli-fastboot');
+      app.editPackageJSON(function(pkg) {
+        pkg['devDependencies']['ember-data'] = '~2.4.0';
+      });
+      return app.run('npm', 'install').then(function() {
+        return app.runEmberCommand('install', 'ember-cli-fastboot');
+      });
     });
   });
 
