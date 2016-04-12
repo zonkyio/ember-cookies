@@ -8,13 +8,17 @@ export default function(name, options = {}) {
       this.application = startApp();
 
       if (options.beforeEach) {
+        // jscs:disable requireSpread
         options.beforeEach.apply(this, arguments);
+        // jscs:enable requireSpread
       }
     },
 
     afterEach() {
       if (options.afterEach) {
+        // jscs:disable requireSpread
         options.afterEach.apply(this, arguments);
+        // jscs:enable requireSpread
       }
 
       destroyApp(this.application);
