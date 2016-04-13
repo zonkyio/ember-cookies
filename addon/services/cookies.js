@@ -1,16 +1,18 @@
 import Ember from 'ember';
 import getOwner from 'ember-getowner-polyfill';
+import _object from 'lodash/object';
+import _collection from 'lodash/collection';
 
-const { inject: { service }, computed, computed: { reads }, A, isEmpty, typeOf } = Ember;
+const { inject: { service }, computed, computed: { reads }, isEmpty, typeOf, assert } = Ember;
 
 export default Ember.Service.extend({
+  _isFastboot: reads('_fastboot.isFastBoot'),
+
   _fastboot: computed(function() {
     let owner = getOwner(this);
 
     return owner.lookup('service:fastboot');
   }),
-
-  _isFastboot: reads('_fastboot.isFastBoot'),
 
   _document: computed(function() {
     return document;
@@ -19,7 +21,7 @@ export default Ember.Service.extend({
   _documentCookies: computed(function() {
     const all = this.get('_document.cookie').split(';');
 
-    return A(all).reduce((acc, cookie) => {
+    return _collection.reduce(all, (acc, cookie) => {
       if (!isEmpty(cookie)) {
         const [key, value] = cookie.split('=');
         acc[key.trim()] = value.trim();
@@ -28,16 +30,27 @@ export default Ember.Service.extend({
     }, {});
   }).volatile(),
 
-  _all: computed(function() {
-    if (this.get('_isFastboot')) {
-      return this.get('_fastboot.cookies');
+  _fastbootCookies: computed(function() {
+    let fastbootCookiesCache = this.get('_fastbootCookiesCache');
+    let fastbootCookies;
+
+    if (!fastbootCookiesCache) {
+      fastbootCookies = this.get('_fastboot.cookies');
+      this.set('_fastbootCookiesCache', fastbootCookies);
     } else {
-      return this.get('_documentCookies');
+      fastbootCookies = this._filterCachedFastbootCookies(fastbootCookiesCache);
     }
+
+    return fastbootCookies;
   }).volatile(),
 
   read(name) {
-    const all = this.get('_all');
+    let all;
+    if (this.get('_isFastboot')) {
+      all = this.get('_fastbootCookies');
+    } else {
+      all = this.get('_documentCookies');
+    }
 
     if (name) {
       return all[name];
@@ -47,36 +60,91 @@ export default Ember.Service.extend({
   },
 
   write(name, value, options = {}) {
-    Ember.assert('Cookies cannot be set to be HTTP-only as those would not be accessible by the Ember.js application itself when running in the browser!', !options.httpOnly);
-    Ember.assert("Cookies cannot be set as signed as signed cookies would not be modifyable in the browser as it has no knowledge of the express server's signing key!", !options.signed);
-    Ember.assert("Cookies cannot be set with both maxAge and an explicit expiration time!", isEmpty(options.expires) || isEmpty(options.maxAge));
+    assert('Cookies cannot be set to be HTTP-only as those cookies would not be accessible by the Ember.js application itself when running in the browser!', !options.httpOnly);
+    assert("Cookies cannot be set as signed as signed cookies would not be modifyable in the browser as it has no knowledge of the express server's signing key!", !options.signed);
+    assert("Cookies cannot be set with both maxAge and an explicit expiration time!", isEmpty(options.expires) || isEmpty(options.maxAge));
     value = encodeURIComponent(value);
 
     if (this.get('_isFastboot')) {
-      if (!isEmpty(options.maxAge)) {
-        options.maxAge = options.maxAge * 1000;
-      }
-      const response = this.get('_fastboot._fastbootInfo.response');
-      response.cookie(name, value, options);
+      this._writeFastbootCookie(name, value, options);
     } else {
-      let cookie = `${name}=${value}`;
-
-      if (!isEmpty(options.domain)) {
-        cookie = `${cookie}; domain=${options.domain}`;
-      }
-      if (typeOf(options.expires) === 'date') {
-        cookie = `${cookie}; expires=${options.expires.toUTCString()}`;
-      }
-      if (!isEmpty(options.maxAge)) {
-        cookie = `${cookie}; max-age=${options.maxAge}`;
-      }
-      if (!!options.secure) {
-        cookie = `${cookie}; secure`;
-      }
-      if (!isEmpty(options.path)) {
-        cookie = `${cookie}; path=${options.path}`;
-      }
-      this.set('_document.cookie', cookie);
+      this._writeDocumentCookie(name, value, options);
     }
+  },
+
+  _writeDocumentCookie(name, value, options = {}) {
+    let cookie = `${name}=${value}`;
+
+    if (!isEmpty(options.domain)) {
+      cookie = `${cookie}; domain=${options.domain}`;
+    }
+    if (typeOf(options.expires) === 'date') {
+      cookie = `${cookie}; expires=${options.expires.toUTCString()}`;
+    }
+    if (!isEmpty(options.maxAge)) {
+      cookie = `${cookie}; max-age=${options.maxAge}`;
+    }
+    if (!!options.secure) {
+      cookie = `${cookie}; secure`;
+    }
+    if (!isEmpty(options.path)) {
+      cookie = `${cookie}; path=${options.path}`;
+    }
+    this.set('_document.cookie', cookie);
+  },
+
+  _writeFastbootCookie(name, value, options = {}) {
+    if (!isEmpty(options.maxAge)) {
+      options.maxAge = options.maxAge * 1000;
+    }
+
+    this._cacheFastbootCookie(...arguments);
+
+    const response = this.get('_fastboot._fastbootInfo.response');
+    response.cookie(name, value, options);
+  },
+
+  _cacheFastbootCookie(name, value, options = {}) {
+    const fastbootCache = this.getWithDefault('_fastbootCookiesCache', {});
+    const cachedOptions = _object.assign({}, options);
+
+    if (cachedOptions.maxAge) {
+      const expires = new Date();
+      expires.setSeconds(expires.getSeconds() + options.maxAge);
+      cachedOptions.expires = expires;
+      delete cachedOptions.maxAge;
+    }
+
+    fastbootCache[name] = { value, options: cachedOptions };
+    this.set('_fastbootCookiesCache', fastbootCache);
+  },
+
+  _filterCachedFastbootCookies(fastbootCookiesCache) {
+    const request = this.get('_fastboot.request');
+    return _collection.reduce(fastbootCookiesCache, (acc, cookie, name) => {
+      const { value, options } = cookie;
+
+      const path = options.path;
+      if (path && request.path.indexOf(path) !== 0) {
+        return acc;
+      }
+
+      const domain = options.domain;
+      if (domain && request.hostname.indexOf(domain) + domain.length !== request.hostname.length) {
+        return acc;
+      }
+
+      const expires = options.expires;
+      if (expires && expires < new Date()) {
+        return acc;
+      }
+
+      if (options.secure && request.protocol !== 'https') {
+        return acc;
+      }
+
+      acc[name] = value;
+      return acc;
+    }, {});
   }
 });

@@ -47,6 +47,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
 
     afterEach(function() {
       document.cookie = `${COOKIE_NAME}=whatever; expires=${new Date(0).toUTCString()}`;
+      document.cookie = `${COOKIE_NAME}=whatever; path=${window.location.pathname}; expires=${new Date(0).toUTCString()}`;
     });
 
     describe('reading a cookie', function() {
@@ -62,6 +63,77 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         let afterRoundtrip = this.subject().read('does-not-exist');
 
         expect(afterRoundtrip).to.be.undefined;
+      });
+
+      it('returns undefined for a cookie that was written for another path', function() {
+        this.subject().write(COOKIE_NAME, 'value', { path: '/some-other-path' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that was written for the same path', function() {
+        const path = window.location.pathname;
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { path: path });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for a cookie that was written for another domain', function() {
+        this.subject().write(COOKIE_NAME, 'value', { domain: 'another-domain.com' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that was written for the same domain', function() {
+        const domain = window.location.hostname;
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { domain: domain });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for an expired cookie', function() {
+        this.subject().write(COOKIE_NAME, 'value', { expires: new Date(-1) });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a not-yet-expired cookie', function() {
+        var expirationDate = new Date();
+        expirationDate.setDate(new Date().getDate() + 1);
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { expires: expirationDate });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for a cookie that reached its max age', function() {
+        this.subject().write(COOKIE_NAME, 'value', { maxAge: -1 });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that has not yet reached its max age', function() {
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { maxAge: 99999999 });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for a cookie that was written for another protocol (secure cookies vs. non-secure request)', function() {
+        const isHTTPS = window.location.protocol === 'https:';
+        this.subject().write(COOKIE_NAME, 'value', { secure: !isHTTPS });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that was written for the same protocol', function() {
+        const isHTTPS = window.location.protocol === 'https:';
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { secure: isHTTPS });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
       });
     });
 
@@ -150,7 +222,8 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
             cookie() {}
           }
         },
-        cookies: {}
+        cookies: {},
+        request: {}
       };
       this.subject().setProperties({
         _isFastboot: true,  
@@ -168,6 +241,87 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
 
       it('returns undefined when the cookies does not exist', function() {
         expect(this.subject().read('does-not-exist')).to.be.undefined;
+      });
+
+      it('returns undefined for a cookie that was written for another path', function() {
+        this.fakeFastboot.request.path = '/path';
+        this.subject().write(COOKIE_NAME, 'value', { path: '/some-other-path' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that was written for the same path', function() {
+        this.fakeFastboot.request.path = '/path';
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { path: '/path' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for a cookie that was written for another domain', function() {
+        this.fakeFastboot.request.hostname = 'example.com';
+        this.subject().write(COOKIE_NAME, 'value', { domain: 'another-domain.com' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that was written for the same domain', function() {
+        this.fakeFastboot.request.hostname = 'example.com';
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { domain: 'example.com' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns the cookie value for a cookie that was written for a parent domain', function() {
+        this.fakeFastboot.request.hostname = 'sub.example.com';
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { domain: 'example.com' });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for an expired cookie', function() {
+        this.subject().write(COOKIE_NAME, 'value', { expires: new Date(-1) });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a not-yet-expired cookie', function() {
+        var expirationDate = new Date();
+        expirationDate.setDate(new Date().getDate() + 1);
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { expires: expirationDate });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for a cookie that reached its max age', function() {
+        this.subject().write(COOKIE_NAME, 'value', { maxAge: -1 });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that has not yet reached its max age', function() {
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { maxAge: 99999999 });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns undefined for a cookie that was written for another protocol (secure cookies vs. non-secure request)', function() {
+        this.fakeFastboot.request.hostname = 'http';
+        this.subject().write(COOKIE_NAME, 'value', { secure: true });
+
+        expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
+      });
+
+      it('returns the cookie value for a cookie that was written for the same protocol', function() {
+        this.fakeFastboot.request.protocol = 'https';
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { secure: true });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
       });
     });
 
@@ -237,14 +391,11 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
     });
 
-    // TODO: I'm unsure at this point what the correct way to go about this is. While this clearly
-    //       behaves different than when run in the browser, one could argue that new cookies shouldn't
-    //       be returned here before they were sent to the browser for the first time.
-    it('reads a cookie that was just written'/*, function() {
+    it('reads a cookie that was just written', function() {
       let value = randomString();
       this.subject().write(COOKIE_NAME, value);
 
       expect(this.subject().read(COOKIE_NAME)).to.eq(value);
-    }*/);
+    });
   });
 });
