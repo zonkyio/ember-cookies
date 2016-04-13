@@ -35,12 +35,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
   describe('in the browser', function() {
     beforeEach(function() {
       this.fakeDocument = {
+        // jscs:disable requireEnhancedObjectLiterals
         get cookie() {
           return document.cookie;
         },
         set cookie(value) {
           document.cookie = value;
         }
+        // jscs:enable requireEnhancedObjectLiterals
       };
       this.subject().setProperties('_document', this.fakeDocument);
     });
@@ -72,9 +74,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns the cookie value for a cookie that was written for the same path', function() {
-        const path = window.location.pathname;
+        let path = window.location.pathname;
         let value = randomString();
-        this.subject().write(COOKIE_NAME, value, { path: path });
+        this.subject().write(COOKIE_NAME, value, { path });
 
         expect(this.subject().read(COOKIE_NAME)).to.eq(value);
       });
@@ -86,9 +88,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns the cookie value for a cookie that was written for the same domain', function() {
-        const domain = window.location.hostname;
+        let domain = window.location.hostname;
         let value = randomString();
-        this.subject().write(COOKIE_NAME, value, { domain: domain });
+        this.subject().write(COOKIE_NAME, value, { domain });
 
         expect(this.subject().read(COOKIE_NAME)).to.eq(value);
       });
@@ -100,7 +102,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns the cookie value for a not-yet-expired cookie', function() {
-        var expirationDate = new Date();
+        let expirationDate = new Date();
         expirationDate.setDate(new Date().getDate() + 1);
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { expires: expirationDate });
@@ -122,14 +124,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another protocol (secure cookies vs. non-secure request)', function() {
-        const isHTTPS = window.location.protocol === 'https:';
+        let isHTTPS = window.location.protocol === 'https:';
         this.subject().write(COOKIE_NAME, 'value', { secure: !isHTTPS });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same protocol', function() {
-        const isHTTPS = window.location.protocol === 'https:';
+        let isHTTPS = window.location.protocol === 'https:';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { secure: isHTTPS });
 
@@ -158,7 +160,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         defineProperty(this.fakeDocument, 'cookie', {
           set(value) {
             expect(value).to.include('; domain=example.com');
-          } 
+          }
         });
 
         this.subject().write(COOKIE_NAME, 'test', { domain: 'example.com' });
@@ -169,7 +171,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         defineProperty(this.fakeDocument, 'cookie', {
           set(value) {
             expect(value).to.include(`; expires=${date.toUTCString()}`);
-          } 
+          }
         });
 
         this.subject().write(COOKIE_NAME, 'test', { expires: date });
@@ -179,7 +181,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         defineProperty(this.fakeDocument, 'cookie', {
           set(value) {
             expect(value).to.include('; max-age=1000');
-          } 
+          }
         });
 
         this.subject().write(COOKIE_NAME, 'test', { maxAge: 1000 });
@@ -189,7 +191,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         defineProperty(this.fakeDocument, 'cookie', {
           set(value) {
             expect(value).to.include('; secure');
-          } 
+          }
         });
 
         this.subject().write(COOKIE_NAME, 'test', { secure: true });
@@ -199,7 +201,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         defineProperty(this.fakeDocument, 'cookie', {
           set(value) {
             expect(value).to.include('; path=/sample-path');
-          } 
+          }
         });
 
         this.subject().write(COOKIE_NAME, 'test', { path: '/sample-path' });
@@ -226,7 +228,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         request: {}
       };
       this.subject().setProperties({
-        _isFastboot: true,  
+        _isFastboot: true,
         _fastboot: this.fakeFastboot
       });
     });
@@ -288,7 +290,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns the cookie value for a not-yet-expired cookie', function() {
-        var expirationDate = new Date();
+        let expirationDate = new Date();
         expirationDate.setDate(new Date().getDate() + 1);
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { expires: expirationDate });

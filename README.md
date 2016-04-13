@@ -36,7 +36,7 @@ export default Ember.Controller.extend({
 
     let cookies = cookieService.read();
     return keys(cookies).reduce((acc, key) => {
-      const value = cookies[key];
+      let value = cookies[key];
       acc.push({ name: key, value });
 
       return acc;
