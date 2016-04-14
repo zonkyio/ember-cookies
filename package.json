@@ -24,7 +24,7 @@
     "chalk": "^1.1.1",
     "ember-ajax": "0.7.1",
     "ember-cli": "2.4.3",
-    "ember-cli-addon-tests": "simplabs/ember-cli-addon-tests#custom-fixture-path",
+    "ember-cli-addon-tests": "tomdale/ember-cli-addon-tests",
     "ember-cli-app-version": "^1.0.0",
     "ember-cli-dependency-checker": "^1.2.0",
     "ember-cli-fastboot": "0.6.1",
