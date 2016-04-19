@@ -222,10 +222,10 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         _fastbootInfo: {
           response: {
             cookie() {}
-          }
+          },
+          request: {}
         },
-        cookies: {},
-        request: {}
+        cookies: {}
       };
       this.subject().setProperties({
         _isFastboot: true,
@@ -246,14 +246,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another path', function() {
-        this.fakeFastboot.request.path = '/path';
+        this.fakeFastboot._fastbootInfo.request.path = '/path';
         this.subject().write(COOKIE_NAME, 'value', { path: '/some-other-path' });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same path', function() {
-        this.fakeFastboot.request.path = '/path';
+        this.fakeFastboot._fastbootInfo.request.path = '/path';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { path: '/path' });
 
@@ -261,14 +261,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another domain', function() {
-        this.fakeFastboot.request.hostname = 'example.com';
+        this.fakeFastboot._fastbootInfo.request.hostname = 'example.com';
         this.subject().write(COOKIE_NAME, 'value', { domain: 'another-domain.com' });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same domain', function() {
-        this.fakeFastboot.request.hostname = 'example.com';
+        this.fakeFastboot._fastbootInfo.request.hostname = 'example.com';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { domain: 'example.com' });
 
@@ -276,7 +276,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns the cookie value for a cookie that was written for a parent domain', function() {
-        this.fakeFastboot.request.hostname = 'sub.example.com';
+        this.fakeFastboot._fastbootInfo.request.hostname = 'sub.example.com';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { domain: 'example.com' });
 
@@ -312,14 +312,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another protocol (secure cookies vs. non-secure request)', function() {
-        this.fakeFastboot.request.hostname = 'http';
+        this.fakeFastboot._fastbootInfo.request.hostname = 'http';
         this.subject().write(COOKIE_NAME, 'value', { secure: true });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same protocol', function() {
-        this.fakeFastboot.request.protocol = 'https';
+        this.fakeFastboot._fastbootInfo.request.protocol = 'https';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { secure: true });
 

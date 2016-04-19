@@ -120,9 +120,11 @@ export default Ember.Service.extend({
   },
 
   _filterCachedFastbootCookies(fastbootCookiesCache) {
-    let request = this.get('_fastboot.request');
+    let request = this.get('_fastboot._fastbootInfo.request');
     return _collection.reduce(fastbootCookiesCache, (acc, cookie, name) => {
       let { value, options } = cookie;
+      options = options || {};
+
       let { path, domain, expires, secure } = options;
 
       if (path && request.path.indexOf(path) !== 0) {
