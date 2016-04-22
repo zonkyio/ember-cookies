@@ -1,3 +1,9 @@
+# 0.0.5
+
+* FastBoot is now always being referred to correctly with a capital "B", see
+  #15.
+* Values are now encoded when written and decoded when read, see #14.
+
 # 0.0.4
 
 * ember-lodash is now a direct dependency of ember-cookies while it was only a
