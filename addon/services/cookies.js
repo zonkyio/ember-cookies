@@ -3,7 +3,7 @@ import getOwner from 'ember-getowner-polyfill';
 import _object from 'lodash/object';
 import _collection from 'lodash/collection';
 
-const { computed, computed: { reads }, isEmpty, typeOf, assert } = Ember;
+const { computed, computed: { reads }, isEmpty, typeOf, isNone, assert } = Ember;
 
 export default Ember.Service.extend({
   _isFastboot: reads('_fastboot.isFastBoot'),
@@ -53,9 +53,9 @@ export default Ember.Service.extend({
     }
 
     if (name) {
-      return all[name];
+      return this._decodeValue(all[name]);
     } else {
-      return all;
+      return _collection.map(all, (value) => this._decodeValue(value));
     }
   },
 
@@ -63,7 +63,7 @@ export default Ember.Service.extend({
     assert('Cookies cannot be set to be HTTP-only as those cookies would not be accessible by the Ember.js application itself when running in the browser!', !options.httpOnly);
     assert("Cookies cannot be set as signed as signed cookies would not be modifyable in the browser as it has no knowledge of the express server's signing key!", !options.signed);
     assert('Cookies cannot be set with both maxAge and an explicit expiration time!', isEmpty(options.expires) || isEmpty(options.maxAge));
-    value = encodeURIComponent(value);
+    value = this._encodeValue(value);
 
     if (this.get('_isFastboot')) {
       this._writeFastbootCookie(name, value, options);
@@ -146,5 +146,21 @@ export default Ember.Service.extend({
       acc[name] = value;
       return acc;
     }, {});
+  },
+
+  _encodeValue(value) {
+    if (isNone(value)) {
+      return value;
+    } else {
+      return encodeURIComponent(value);
+    }
+  },
+
+  _decodeValue(value) {
+    if (isNone(value)) {
+      return value;
+    } else {
+      return decodeURIComponent(value);
+    }
   }
 });
