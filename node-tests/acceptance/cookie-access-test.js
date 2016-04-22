@@ -28,7 +28,7 @@ describe('cookies access', function() {
     return app.stopServer();
   });
 
-  it('reads and writes cookies in Fastboot', function() {
+  it('reads and writes cookies in FastBoot', function() {
     return app.startServer({
       command: 'fastboot'
     }).then(function() {

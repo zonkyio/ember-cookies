@@ -6,12 +6,12 @@ import _collection from 'lodash/collection';
 const { computed, computed: { reads }, isEmpty, typeOf, isNone, assert } = Ember;
 
 export default Ember.Service.extend({
-  _isFastboot: reads('_fastboot.isFastBoot'),
+  _isFastBoot: reads('_fastBoot.isFastBoot'),
 
-  _fastboot: computed(function() {
+  _fastBoot: computed(function() {
     let owner = getOwner(this);
 
-    return owner.lookup('service:fastboot');
+    return owner.lookup('service:fastBoot');
   }),
 
   _document: computed(function() {
@@ -30,24 +30,24 @@ export default Ember.Service.extend({
     }, {});
   }).volatile(),
 
-  _fastbootCookies: computed(function() {
-    let fastbootCookiesCache = this.get('_fastbootCookiesCache');
-    let fastbootCookies;
+  _fastBootCookies: computed(function() {
+    let fastBootCookiesCache = this.get('_fastBootCookiesCache');
+    let fastBootCookies;
 
-    if (!fastbootCookiesCache) {
-      fastbootCookies = this.get('_fastboot.cookies');
-      this.set('_fastbootCookiesCache', fastbootCookies);
+    if (!fastBootCookiesCache) {
+      fastBootCookies = this.get('_fastBoot.cookies');
+      this.set('_fastBootCookiesCache', fastBootCookies);
     } else {
-      fastbootCookies = this._filterCachedFastbootCookies(fastbootCookiesCache);
+      fastBootCookies = this._filterCachedFastBootCookies(fastBootCookiesCache);
     }
 
-    return fastbootCookies;
+    return fastBootCookies;
   }).volatile(),
 
   read(name) {
     let all;
-    if (this.get('_isFastboot')) {
-      all = this.get('_fastbootCookies');
+    if (this.get('_isFastBoot')) {
+      all = this.get('_fastBootCookies');
     } else {
       all = this.get('_documentCookies');
     }
@@ -65,8 +65,8 @@ export default Ember.Service.extend({
     assert('Cookies cannot be set with both maxAge and an explicit expiration time!', isEmpty(options.expires) || isEmpty(options.maxAge));
     value = this._encodeValue(value);
 
-    if (this.get('_isFastboot')) {
-      this._writeFastbootCookie(name, value, options);
+    if (this.get('_isFastBoot')) {
+      this._writeFastBootCookie(name, value, options);
     } else {
       this._writeDocumentCookie(name, value, options);
     }
@@ -93,19 +93,19 @@ export default Ember.Service.extend({
     this.set('_document.cookie', cookie);
   },
 
-  _writeFastbootCookie(name, value, options = {}) {
+  _writeFastBootCookie(name, value, options = {}) {
     if (!isEmpty(options.maxAge)) {
       options.maxAge = options.maxAge * 1000;
     }
 
-    this._cacheFastbootCookie(...arguments);
+    this._cacheFastBootCookie(...arguments);
 
-    let response = this.get('_fastboot._fastbootInfo.response');
+    let response = this.get('_fastBoot._fastBootInfo.response');
     response.cookie(name, value, options);
   },
 
-  _cacheFastbootCookie(name, value, options = {}) {
-    let fastbootCache = this.getWithDefault('_fastbootCookiesCache', {});
+  _cacheFastBootCookie(name, value, options = {}) {
+    let fastBootCache = this.getWithDefault('_fastBootCookiesCache', {});
     let cachedOptions = _object.assign({}, options);
 
     if (cachedOptions.maxAge) {
@@ -115,13 +115,13 @@ export default Ember.Service.extend({
       delete cachedOptions.maxAge;
     }
 
-    fastbootCache[name] = { value, options: cachedOptions };
-    this.set('_fastbootCookiesCache', fastbootCache);
+    fastBootCache[name] = { value, options: cachedOptions };
+    this.set('_fastBootCookiesCache', fastBootCache);
   },
 
-  _filterCachedFastbootCookies(fastbootCookiesCache) {
-    let request = this.get('_fastboot._fastbootInfo.request');
-    return _collection.reduce(fastbootCookiesCache, (acc, cookie, name) => {
+  _filterCachedFastBootCookies(fastBootCookiesCache) {
+    let request = this.get('_fastBoot._fastBootInfo.request');
+    return _collection.reduce(fastBootCookiesCache, (acc, cookie, name) => {
       let { value, options } = cookie;
       options = options || {};
 

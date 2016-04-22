@@ -2,10 +2,10 @@
 
 `ember-cookies` implements an abstract __cookie API that works both in the
 browser (via `document.cookie`) as well as with Fastboot in the server
-context__ (using the `request` and `response` accessible via the `fastboot`
+context__ (using the `request` and `response` accessible via the `fastBoot`
 service).
 
-__Having access to cookies both in the browser as well as in Fastboot is key to
+__Having access to cookies both in the browser as well as in FastBoot is key to
 being able to share a common session.__
 
 __This is currently still in a very early stage. While the dummy app works, the
