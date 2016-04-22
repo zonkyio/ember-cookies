@@ -216,10 +216,10 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
     });
   });
 
-  describe('in the Fastboot server', function() {
+  describe('in the FastBoot server', function() {
     beforeEach(function() {
-      this.fakeFastboot = {
-        _fastbootInfo: {
+      this.fakeFastBoot = {
+        _fastBootInfo: {
           response: {
             cookie() {}
           },
@@ -228,15 +228,15 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         cookies: {}
       };
       this.subject().setProperties({
-        _isFastboot: true,
-        _fastboot: this.fakeFastboot
+        _isFastBoot: true,
+        _fastBoot: this.fakeFastBoot
       });
     });
 
     describe('reading a cookie', function() {
       it('returns the cookie value', function() {
         let value = randomString();
-        this.fakeFastboot.cookies[COOKIE_NAME] = value;
+        this.fakeFastBoot.cookies[COOKIE_NAME] = value;
 
         expect(this.subject().read(COOKIE_NAME)).to.eq(value);
       });
@@ -246,14 +246,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another path', function() {
-        this.fakeFastboot._fastbootInfo.request.path = '/path';
+        this.fakeFastBoot._fastBootInfo.request.path = '/path';
         this.subject().write(COOKIE_NAME, 'value', { path: '/some-other-path' });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same path', function() {
-        this.fakeFastboot._fastbootInfo.request.path = '/path';
+        this.fakeFastBoot._fastBootInfo.request.path = '/path';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { path: '/path' });
 
@@ -261,14 +261,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another domain', function() {
-        this.fakeFastboot._fastbootInfo.request.hostname = 'example.com';
+        this.fakeFastBoot._fastBootInfo.request.hostname = 'example.com';
         this.subject().write(COOKIE_NAME, 'value', { domain: 'another-domain.com' });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same domain', function() {
-        this.fakeFastboot._fastbootInfo.request.hostname = 'example.com';
+        this.fakeFastBoot._fastBootInfo.request.hostname = 'example.com';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { domain: 'example.com' });
 
@@ -276,7 +276,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns the cookie value for a cookie that was written for a parent domain', function() {
-        this.fakeFastboot._fastbootInfo.request.hostname = 'sub.example.com';
+        this.fakeFastBoot._fastBootInfo.request.hostname = 'sub.example.com';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { domain: 'example.com' });
 
@@ -312,14 +312,14 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('returns undefined for a cookie that was written for another protocol (secure cookies vs. non-secure request)', function() {
-        this.fakeFastboot._fastbootInfo.request.hostname = 'http';
+        this.fakeFastBoot._fastBootInfo.request.hostname = 'http';
         this.subject().write(COOKIE_NAME, 'value', { secure: true });
 
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
       it('returns the cookie value for a cookie that was written for the same protocol', function() {
-        this.fakeFastboot._fastbootInfo.request.protocol = 'https';
+        this.fakeFastBoot._fastBootInfo.request.protocol = 'https';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { secure: true });
 
@@ -333,7 +333,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       it('writes the value', function() {
         let value = randomString();
 
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue) {
           expect(name).to.eq(COOKIE_NAME);
           expect(theValue).to.eq(value);
         };
@@ -344,7 +344,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       it('URI-component-encodes the value', function() {
         let value = '!"§$%&/()=?"';
 
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue) {
           expect(theValue).to.eq(encodeURIComponent(value));
         };
 
@@ -352,7 +352,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('sets the cookie domain', function() {
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue, options) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue, options) {
           expect(options.domain).to.eq('example.com');
         };
 
@@ -361,7 +361,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
 
       it('sets the expiration', function() {
         let date = new Date();
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue, options) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue, options) {
           expect(options.expires).to.eq(date);
         };
 
@@ -369,7 +369,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('sets the max age', function() {
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue, options) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue, options) {
           expect(options.maxAge).to.eq(1000);
         };
 
@@ -377,7 +377,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('sets the secure flag', function() {
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue, options) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue, options) {
           expect(options.secure).to.be.true;
         };
 
@@ -385,7 +385,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
 
       it('sets the path', function() {
-        this.fakeFastboot._fastbootInfo.response.cookie = function(name, theValue, options) {
+        this.fakeFastBoot._fastBootInfo.response.cookie = function(name, theValue, options) {
           expect(options.path).to.eq('/sample-path');
         };
 
