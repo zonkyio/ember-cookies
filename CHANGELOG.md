@@ -1,3 +1,8 @@
+# 0.0.6
+
+* The fastboot service is now correctly referenced as `service:fastboot`, see
+  #16.
+
 # 0.0.5
 
 * FastBoot is now always being referred to correctly with a capital "B", see

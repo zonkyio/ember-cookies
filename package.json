@@ -1,6 +1,6 @@
 {
   "name": "ember-cookies",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Cookies abstraction for Ember.js that works both in the browser as well as with Fastboot on the server.",
   "directories": {
     "doc": "doc",
