@@ -11,7 +11,7 @@ export default Ember.Service.extend({
   _fastBoot: computed(function() {
     let owner = getOwner(this);
 
-    return owner.lookup('service:fastBoot');
+    return owner.lookup('service:fastboot');
   }),
 
   _document: computed(function() {
