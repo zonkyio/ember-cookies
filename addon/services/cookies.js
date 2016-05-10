@@ -3,7 +3,14 @@ import getOwner from 'ember-getowner-polyfill';
 import _object from 'lodash/object';
 import _collection from 'lodash/collection';
 
-const { computed, computed: { reads }, isEmpty, typeOf, isNone, assert } = Ember;
+const {
+  computed,
+  computed: { reads },
+  isEmpty,
+  typeOf,
+  isNone,
+  assert
+} = Ember;
 
 export default Ember.Service.extend({
   _isFastBoot: reads('_fastBoot.isFastBoot'),
@@ -31,17 +38,14 @@ export default Ember.Service.extend({
   }).volatile(),
 
   _fastBootCookies: computed(function() {
-    let fastBootCookiesCache = this.get('_fastBootCookiesCache');
-    let fastBootCookies;
+    let fastBootCookies = this.get('_fastBootCookiesCache');
 
-    if (!fastBootCookiesCache) {
-      fastBootCookies = this.get('_fastBoot.cookies');
+    if (!fastBootCookies) {
+      fastBootCookies = this.get('_fastBoot.request.cookies');
       this.set('_fastBootCookiesCache', fastBootCookies);
-    } else {
-      fastBootCookies = this._filterCachedFastBootCookies(fastBootCookiesCache);
     }
 
-    return fastBootCookies;
+    return this._filterCachedFastBootCookies(fastBootCookies);
   }).volatile(),
 
   read(name) {
@@ -73,35 +77,21 @@ export default Ember.Service.extend({
   },
 
   _writeDocumentCookie(name, value, options = {}) {
-    let cookie = `${name}=${value}`;
-
-    if (!isEmpty(options.domain)) {
-      cookie = `${cookie}; domain=${options.domain}`;
-    }
-    if (typeOf(options.expires) === 'date') {
-      cookie = `${cookie}; expires=${options.expires.toUTCString()}`;
-    }
-    if (!isEmpty(options.maxAge)) {
-      cookie = `${cookie}; max-age=${options.maxAge}`;
-    }
-    if (!!options.secure) {
-      cookie = `${cookie}; secure`;
-    }
-    if (!isEmpty(options.path)) {
-      cookie = `${cookie}; path=${options.path}`;
-    }
-    this.set('_document.cookie', cookie);
+    let serializedCookie = this._serializeCookie(name, value, options);
+    this.set('_document.cookie', serializedCookie);
   },
 
   _writeFastBootCookie(name, value, options = {}) {
+    let responseHeaders  = this.get('_fastBoot.response.headers');
+    let serializedCookie = this._serializeCookie(...arguments);
+
     if (!isEmpty(options.maxAge)) {
       options.maxAge = options.maxAge * 1000;
     }
 
     this._cacheFastBootCookie(...arguments);
 
-    let response = this.get('_fastBoot._fastBootInfo.response');
-    response.cookie(name, value, options);
+    responseHeaders.append('set-cookie', serializedCookie);
   },
 
   _cacheFastBootCookie(name, value, options = {}) {
@@ -120,18 +110,19 @@ export default Ember.Service.extend({
   },
 
   _filterCachedFastBootCookies(fastBootCookiesCache) {
-    let request = this.get('_fastBoot._fastBootInfo.request');
+    let { hostname, path: requestPath, protocol } = this.get('_fastBoot.request');
+
     return _collection.reduce(fastBootCookiesCache, (acc, cookie, name) => {
       let { value, options } = cookie;
       options = options || {};
 
-      let { path, domain, expires, secure } = options;
+      let { path: optionsPath, domain, expires, secure } = options;
 
-      if (path && request.path.indexOf(path) !== 0) {
+      if (optionsPath && requestPath.indexOf(optionsPath) !== 0) {
         return acc;
       }
 
-      if (domain && request.hostname.indexOf(domain) + domain.length !== request.hostname.length) {
+      if (domain && hostname.indexOf(domain) + domain.length !== hostname.length) {
         return acc;
       }
 
@@ -139,7 +130,7 @@ export default Ember.Service.extend({
         return acc;
       }
 
-      if (secure && request.protocol !== 'https') {
+      if (secure && protocol !== 'https') {
         return acc;
       }
 
@@ -162,5 +153,27 @@ export default Ember.Service.extend({
     } else {
       return decodeURIComponent(value);
     }
+  },
+
+  _serializeCookie(name, value, options = {}) {
+    let cookie = `${name}=${value}`;
+
+    if (!isEmpty(options.domain)) {
+      cookie = `${cookie}; domain=${options.domain}`;
+    }
+    if (typeOf(options.expires) === 'date') {
+      cookie = `${cookie}; expires=${options.expires.toUTCString()}`;
+    }
+    if (!isEmpty(options.maxAge)) {
+      cookie = `${cookie}; max-age=${options.maxAge}`;
+    }
+    if (!!options.secure) {
+      cookie = `${cookie}; secure`;
+    }
+    if (!isEmpty(options.path)) {
+      cookie = `${cookie}; path=${options.path}`;
+    }
+
+    return cookie;
   }
 });
