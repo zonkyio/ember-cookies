@@ -1,3 +1,8 @@
+# 0.0.7
+
+* Cookies are now written directly to the response headers in FastBoot mode,
+  see #17.
+
 # 0.0.6
 
 * The fastboot service is now correctly referenced as `service:fastboot`, see
