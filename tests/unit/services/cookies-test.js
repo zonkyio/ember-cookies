@@ -12,7 +12,7 @@ function randomString() {
 }
 
 describeModule('service:cookies', 'CookiesService', {}, function() {
-  function writeOptionsValidation() {
+  function itValidatesWriteOptions() {
     it('throws when the signed option is set', function() {
       expect(() => {
         this.subject().write(COOKIE_NAME, 'test', { signed: true });
@@ -29,6 +29,15 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       expect(() => {
         this.subject().write(COOKIE_NAME, 'test', { expires: new Date(), maxAge: 1000 });
       }).to.throw();
+    });
+  }
+
+  function itReadsAfterWrite() {
+    it('reads a cookie that was just written', function() {
+      let value = randomString();
+      this.subject().write(COOKIE_NAME, value);
+
+      expect(this.subject().read(COOKIE_NAME)).to.eq(value);
     });
   }
 
@@ -50,12 +59,6 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
     afterEach(function() {
       document.cookie = `${COOKIE_NAME}=whatever; expires=${new Date(0).toUTCString()}`;
       document.cookie = `${COOKIE_NAME}=whatever; path=${window.location.pathname}; expires=${new Date(0).toUTCString()}`;
-    });
-
-    it('should not fail when there is no fastBoot service', function() {
-      let subject = this.subject();
-      let fastBoot = subject.get('_fastBoot');
-      expect(fastBoot).to.equal(undefined);
     });
 
     describe('reading a cookie', function() {
@@ -146,7 +149,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
     });
 
     describe('writing a cookie', function() {
-      writeOptionsValidation.apply(this);
+      itValidatesWriteOptions.apply(this);
 
       it('writes the value', function() {
         let value = randomString();
@@ -214,12 +217,7 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
     });
 
-    it('reads a cookie that was just written', function() {
-      let value = randomString();
-      this.subject().write(COOKIE_NAME, value);
-
-      expect(this.subject().read(COOKIE_NAME)).to.eq(value);
-    });
+    itReadsAfterWrite.apply(this);
   });
 
   describe('in the FastBoot server', function() {
@@ -387,15 +385,15 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
     });
 
     describe('writing a cookie', function() {
-      writeOptionsValidation.apply(this);
+      itValidatesWriteOptions.apply(this);
 
       it('writes the value', function() {
         let value = randomString();
         let subject = this.subject();
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=${value}`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=${value}`);
         };
 
         subject.write(COOKIE_NAME, value);
@@ -406,9 +404,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         let encodedValue = encodeURIComponent(value);
         let subject = this.subject();
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=${encodedValue}`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=${encodedValue}`);
         };
 
         subject.write(COOKIE_NAME, value);
@@ -419,9 +417,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         let subject = this.subject();
         this.fakeFastBoot.request.hostname = domain;
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=test; domain=${domain}`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=test; domain=${domain}`);
         };
 
         subject.write(COOKIE_NAME, 'test', { domain });
@@ -431,9 +429,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         let subject = this.subject();
         let date = new Date();
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=test; expires=${date.toUTCString()}`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=test; expires=${date.toUTCString()}`);
         };
 
         subject.write(COOKIE_NAME, 'test', { expires: date });
@@ -443,9 +441,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         let subject = this.subject();
         let maxAge = 10;
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=test; max-age=${maxAge}`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=test; max-age=${maxAge}`);
         };
 
         subject.write(COOKIE_NAME, 'test', { maxAge });
@@ -454,9 +452,9 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       it('sets the secure flag', function() {
         let subject = this.subject();
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=test; secure`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=test; secure`);
         };
 
         subject.write(COOKIE_NAME, 'test', { secure: true });
@@ -466,22 +464,15 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         let subject = this.subject();
         let path = '/sample-path';
 
-        subject._fastBoot.response.headers.append = function(...args) {
-          expect(args[0]).to.equal('set-cookie');
-          expect(args[1]).to.equal(`${COOKIE_NAME}=test; path=${path}`);
+        this.fakeFastBoot.response.headers.append = function(headerName, headerValue) {
+          expect(headerName).to.equal('set-cookie');
+          expect(headerValue).to.equal(`${COOKIE_NAME}=test; path=${path}`);
         };
 
         subject.write(COOKIE_NAME, 'test', { path });
       });
     });
 
-    describe('cookie caching', function() {
-      it('reads a cookie that was just written', function() {
-        let value = randomString();
-        this.subject().write(COOKIE_NAME, value);
-
-        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
-      });
-    });
+    itReadsAfterWrite.apply(this);
   });
 });
