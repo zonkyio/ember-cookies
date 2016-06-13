@@ -217,6 +217,19 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
       });
     });
 
+    describe('clearing a cookie', function() {
+      it('clears the cookie', function() {
+        let value = randomString();
+        document.cookie = `${COOKIE_NAME}=${value};`;
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+
+        this.subject().clear(COOKIE_NAME);
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(undefined);
+      });
+    });
+
     itReadsAfterWrite.apply(this);
   });
 
@@ -470,6 +483,19 @@ describeModule('service:cookies', 'CookiesService', {}, function() {
         };
 
         subject.write(COOKIE_NAME, 'test', { path });
+      });
+    });
+
+    describe('clearing a cookie', function() {
+      it('clears the cookie', function() {
+        let value = randomString();
+        this.fakeFastBoot.request.cookies[COOKIE_NAME] = { value };
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+
+        this.subject().clear(COOKIE_NAME);
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(undefined);
       });
     });
 
