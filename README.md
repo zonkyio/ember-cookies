@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/simplabs/ember-cookies.svg?branch=master)](https://travis-ci.org/simplabs/ember-cookies)
+
 # ember-cookies
 
 `ember-cookies` implements an abstract __cookie API that works both in the
