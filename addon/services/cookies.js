@@ -146,7 +146,7 @@ export default Ember.Service.extend({
 
   _encodeValue(value) {
     if (isNone(value)) {
-      return value;
+      return '';
     } else {
       return encodeURIComponent(value);
     }
