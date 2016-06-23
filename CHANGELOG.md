@@ -1,3 +1,7 @@
+# 0.0.9
+
+* Handling of FastBoot cookies has been fixed, see #24.
+
 # 0.0.8
 
 * The new `clear` method was added to delete a particular cookie, see #20.
