@@ -1,3 +1,8 @@
+# 0.0.8
+
+* The new `clear` method was added to delete a particular cookie, see #20.
+* The dependency on ember-lodash was removed, see #22.
+
 # 0.0.7
 
 * Cookies are now written directly to the response headers in FastBoot mode,
