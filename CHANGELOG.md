@@ -1,3 +1,7 @@
+# 0.0.10
+
+* Fix usage of the FastBoot host, see #25.
+
 # 0.0.9
 
 * Handling of FastBoot cookies has been fixed, see #24.
