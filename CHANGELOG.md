@@ -1,3 +1,7 @@
+# 0.0.11
+
+* A deprecation triggered by ember-getowner-polyfill has been fixed, see #30.
+
 # 0.0.10
 
 * Fix usage of the FastBoot host, see #25.
