@@ -1,3 +1,8 @@
+# 0.0.12
+
+* The `cookies` service's `clear` method now accepts options, see #48.
+* ember-cookies now uses ESLint instead of JSHint/JSCS, see #37.
+
 # 0.0.11
 
 * A deprecation triggered by ember-getowner-polyfill has been fixed, see #30.
