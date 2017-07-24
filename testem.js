@@ -9,5 +9,16 @@ module.exports = {
   ],
   launch_in_dev: [
     'Chrome'
-  ]
+  ],
+  browser_args: {
+    Chrome: {
+      mode: 'ci',
+      args: [
+        '--headless',
+        '--window-size=1440,900',
+        '--disable-gpu',
+        '--remote-debugging-port=9222'
+      ]
+    }
+  }
 };
