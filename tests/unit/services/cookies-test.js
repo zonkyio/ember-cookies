@@ -440,8 +440,16 @@ describe('CookiesService', function() {
         expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
       });
 
-      it('returns the cookie value for a cookie that was written for the same protocol', function() {
+      it('returns the cookie value for a cookie that was written for the same protocol ("https")', function() {
         this.fakeFastBoot.request.protocol = 'https';
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value, { secure: true });
+
+        expect(this.subject().read(COOKIE_NAME)).to.eq(value);
+      });
+
+      it('returns the cookie value for a cookie that was written for the same protocol ("https:")', function() {
+        this.fakeFastBoot.request.protocol = 'https:';
         let value = randomString();
         this.subject().write(COOKIE_NAME, value, { secure: true });
 
