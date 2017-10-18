@@ -1,4 +1,15 @@
-# 0.0.12
+# 0.1.0
+
+* Allow ember-getowner-polyfill ^1.1.0 and ^2.0.0 (#118)
+* Use "New Module Imports" (#117)
+* Set fake document on service in tests (#114)
+* Ensure multiple options are added to the cookie (#113)
+* Document `maxAge` option. (#112)
+* Update ember-cli-babel to version 6.6.0 (#111)
+* Remove unnecessary dependencies (#87)
+* Add options to args for clear() in README (#56)
+
+# 0.0.13
 
 * Update the ember-getowner-polyfill dependency, see #49.
 
