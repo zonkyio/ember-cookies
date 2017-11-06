@@ -1,3 +1,10 @@
+# 0.1.1
+
+* Accept both `https` and `https:` as valid protocols for HTTPS detections,
+  see #132.
+* Add `raw` option to `read` and `write` that disables URL-en/decoding, see
+  #134.
+
 # 0.1.0
 
 * Allow ember-getowner-polyfill ^1.1.0 and ^2.0.0 (#118)
