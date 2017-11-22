@@ -1,3 +1,8 @@
+# 0.1.2
+
+* Added a new `clearAllCookies` helper function for clearing all cookies in
+  tests, see #140.
+
 # 0.1.1
 
 * Accept both `https` and `https:` as valid protocols for HTTPS detections,
