@@ -1,3 +1,7 @@
+# 0.1.3
+
+* A runtime error in Internet Explorer was fixed, see #149.
+
 # 0.1.2
 
 * Added a new `clearAllCookies` helper function for clearing all cookies in
