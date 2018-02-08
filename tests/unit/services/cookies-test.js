@@ -138,8 +138,9 @@ describe('CookiesService', function() {
         expect(afterRoundtrip).to.eq(value);
       });
 
-      it('handles invalid values for cookies', function() {
+      it('handles invalid cookies', function() {
         document.cookie = '=blank';
+
         expect(this.subject().read('')).to.deep.equal({});
       });
 
@@ -387,6 +388,25 @@ describe('CookiesService', function() {
 
         expect(this.subject().read('test1')).to.be.empty;
         expect(this.subject().read('test2')).to.be.empty;
+      });
+    });
+
+    describe("checking for a cookie's existence", function() {
+      it('returns true when the cookie exists', function() {
+        let value = randomString();
+        document.cookie = `${COOKIE_NAME}=${value};`;
+
+        expect(this.subject().exists(COOKIE_NAME)).to.be.true;
+      });
+
+      it('returns true when the cookie exists with a falsy value', function() {
+        document.cookie = `${COOKIE_NAME}=;`;
+
+        expect(this.subject().exists(COOKIE_NAME)).to.be.true;
+      });
+
+      it('returns false when the cookie does not exist', function() {
+        expect(this.subject().exists(COOKIE_NAME)).to.be.false;
       });
     });
 
@@ -705,6 +725,25 @@ describe('CookiesService', function() {
 
           expect(this.subject().read(COOKIE_NAME)).to.be.undefined;
         });
+      });
+    });
+
+    describe("checking for a cookie's existence", function() {
+      it('returns true when the cookie exists', function() {
+        let value = randomString();
+        this.subject().write(COOKIE_NAME, value);
+
+        expect(this.subject().exists(COOKIE_NAME)).to.be.true;
+      });
+
+      it('returns true when the cookie exists with a falsy value', function() {
+        this.subject().write(COOKIE_NAME);
+
+        expect(this.subject().exists(COOKIE_NAME)).to.be.true;
+      });
+
+      it('returns false when the cookie does not exist', function() {
+        expect(this.subject().exists(COOKIE_NAME)).to.be.false;
       });
     });
 

@@ -30,7 +30,7 @@ export default Service.extend({
     return filtered.reduce((acc, cookie) => {
       if (!isEmpty(cookie)) {
         let [key, value] = cookie;
-        acc[key.trim()] = value.trim();
+        acc[key.trim()] = (value || '').trim();
       }
       return acc;
     }, {});
@@ -90,6 +90,17 @@ export default Service.extend({
 
     options.expires = new Date('1970-01-01');
     this.write(name, null, options);
+  },
+
+  exists(name) {
+    let all;
+    if (this.get('_isFastBoot')) {
+      all = this.get('_fastBootCookies');
+    } else {
+      all = this.get('_documentCookies');
+    }
+
+    return all.hasOwnProperty(name);
   },
 
   _writeDocumentCookie(name, value, options = {}) {
@@ -178,7 +189,7 @@ export default Service.extend({
 
   _filterDocumentCookies(unfilteredCookies) {
     return unfilteredCookies.map((c) => c.split('='))
-      .filter((c) => isPresent(c[0]) && isPresent(c[1]));
+      .filter((c) => c.length === 2 && isPresent(c[0]));
   },
 
   _serializeCookie(name, value, options = {}) {
