@@ -38,7 +38,7 @@ export default Service.extend({
   }).volatile(),
 
   _fastBootCookies: computed(function() {
-    let fastBootCookiesCache = this.get('_fastBootCookiesCache');
+    let fastBootCookiesCache = this._fastBootCookiesCache;
 
     if (!fastBootCookiesCache) {
       let fastBootCookies = this.get('_fastBoot.request.cookies');
@@ -47,7 +47,7 @@ export default Service.extend({
         acc[name] = { value };
         return acc;
       }, {});
-      this.set('_fastBootCookiesCache', fastBootCookiesCache);
+      this._fastBootCookiesCache = fastBootCookiesCache;
     }
 
     return this._filterCachedFastBootCookies(fastBootCookiesCache);
@@ -127,7 +127,7 @@ export default Service.extend({
   },
 
   _cacheFastBootCookie(name, value, options = {}) {
-    let fastBootCache = this.getWithDefault('_fastBootCookiesCache', {});
+    let fastBootCache = this._fastBootCookiesCache || {};
     let cachedOptions = merge({}, options);
 
     if (cachedOptions.maxAge) {
@@ -138,7 +138,7 @@ export default Service.extend({
     }
 
     fastBootCache[name] = { value, options: cachedOptions };
-    this.set('_fastBootCookiesCache', fastBootCache);
+    this._fastBootCookiesCache = fastBootCache;
   },
 
   _filterCachedFastBootCookies(fastBootCookiesCache) {
