@@ -1,3 +1,9 @@
+# 0.3.1
+
+* A bug that prevented cookies from being read from the request header
+  correctly in FastBoot if another cookie had been written before was fixed,
+  see #181.
+
 # 0.3.0
 
 * When writing a cookie, the written value is now checked to not exceed 4096
