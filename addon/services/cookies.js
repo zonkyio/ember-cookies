@@ -38,19 +38,18 @@ export default Service.extend({
   }).volatile(),
 
   _fastBootCookies: computed(function() {
-    let fastBootCookiesCache = this.get('_fastBootCookiesCache');
+    let fastBootCookies = this.get('_fastBoot.request.cookies');
+    fastBootCookies = A(keys(fastBootCookies)).reduce((acc, name) => {
+      let value = fastBootCookies[name];
+      acc[name] = { value };
+      return acc;
+    }, {});
 
-    if (!fastBootCookiesCache) {
-      let fastBootCookies = this.get('_fastBoot.request.cookies');
-      fastBootCookiesCache = A(keys(fastBootCookies)).reduce((acc, name) => {
-        let value = fastBootCookies[name];
-        acc[name] = { value };
-        return acc;
-      }, {});
-      this.set('_fastBootCookiesCache', fastBootCookiesCache);
-    }
+    let fastBootCookiesCache = this._fastBootCookiesCache || {};
+    fastBootCookies = assign({}, fastBootCookies, fastBootCookiesCache);
+    this._fastBootCookiesCache = fastBootCookies;
 
-    return this._filterCachedFastBootCookies(fastBootCookiesCache);
+    return this._filterCachedFastBootCookies(fastBootCookies);
   }).volatile(),
 
   read(name, options = {}) {
@@ -127,7 +126,7 @@ export default Service.extend({
   },
 
   _cacheFastBootCookie(name, value, options = {}) {
-    let fastBootCache = this.getWithDefault('_fastBootCookiesCache', {});
+    let fastBootCache = this._fastBootCookiesCache || {};
     let cachedOptions = merge({}, options);
 
     if (cachedOptions.maxAge) {
@@ -138,17 +137,17 @@ export default Service.extend({
     }
 
     fastBootCache[name] = { value, options: cachedOptions };
-    this.set('_fastBootCookiesCache', fastBootCache);
+    this._fastBootCookiesCache = fastBootCache;
   },
 
-  _filterCachedFastBootCookies(fastBootCookiesCache) {
+  _filterCachedFastBootCookies(fastBootCookies) {
     let { path: requestPath, protocol } = this.get('_fastBoot.request');
 
     // cannot use deconstruct here
     let host = this.get('_fastBoot.request.host');
 
-    return A(keys(fastBootCookiesCache)).reduce((acc, name) => {
-      let { value, options } = fastBootCookiesCache[name];
+    return A(keys(fastBootCookies)).reduce((acc, name) => {
+      let { value, options } = fastBootCookies[name];
       options = options || {};
 
       let { path: optionsPath, domain, expires, secure } = options;

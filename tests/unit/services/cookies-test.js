@@ -572,6 +572,15 @@ describe('CookiesService', function() {
 
         expect(this.subject().read(COOKIE_NAME)).to.eq(value);
       });
+
+      it('respects the request headers after a cookie was written already', function() {
+        let writtenValue = randomString();
+        this.subject().write(COOKIE_NAME, writtenValue);
+        let requestValue = randomString();
+        this.fakeFastBoot.request.cookies = { aRequestCookie: requestValue };
+
+        expect(this.subject().read()).to.deep.equal({ [COOKIE_NAME]: writtenValue, aRequestCookie: requestValue });
+      });
     });
 
     describe('writing a cookie', function() {
