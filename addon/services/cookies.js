@@ -49,7 +49,12 @@ export default Service.extend({
     fastBootCookies = assign({}, fastBootCookies, fastBootCookiesCache);
     this._fastBootCookiesCache = fastBootCookies;
 
-    return this._filterCachedFastBootCookies(fastBootCookies);
+    console.log('cache', JSON.stringify(this._fastBootCookiesCache, null, '\t'))
+    let a = this._filterCachedFastBootCookies(fastBootCookies);
+    console.log('filter', JSON.stringify(a, null, '\t'))
+    return a;
+
+    // return this._filterCachedFastBootCookies(fastBootCookies);
   }).volatile(),
 
   read(name, options = {}) {
